@@ -1,0 +1,13 @@
+{
+    "name": "ayhome/gm-agent",
+    "type": "library",
+    "require": {
+        "topthink/think": "5.0.6"
+    },
+    "authors": [
+        {
+            "name": "ayhome",
+            "email": "ayhome@foxmail.com"
+        }
+    ]
+}
