@@ -4,13 +4,20 @@
     "version": "1.0.0",
     "keywords": ["agent queue"],
     "require": {
-        "topthink/think": "5.0.6",
         "php": ">=5.6.0"
     },
+
     "authors": [
         {
             "name": "ayhome",
             "email": "ayhome@foxmail.com"
         }
-    ]
+    ],
+    "autoload": {
+        "psr-4": {
+            "ayhome\\agent\\": "src"
+        },
+        "files": [
+        ]
+    }
 }
