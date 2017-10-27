@@ -1,6 +1,5 @@
 {
-    "name": "ayhome/gm-center",
-    "description": "center thinkphp5",
+    "name": "ayhome/gm-agent",
     "type": "library",
     "require": {
         "topthink/think": "5.0.6"
