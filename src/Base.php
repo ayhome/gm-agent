@@ -1,27 +1,37 @@
 <?php
 namespace ayhome\agent;
-
+use think\Db;
 class Base{
 
+  public $host ="127.0.0.1";
+  public $port = 9911;
+  public $debug = 0;
 
   public $reConnectTimerId;
   protected $cli;
 
-//shell脚本管理标示
-    const PROCESS_NAME_LOG = ':ayhome-agent-process';
-    //pid保存文件
-    const PID_FILE = './runtime/agent.pid';
+  const PROCESS_NAME_LOG = ':ayhome-agent-process';
+  //pid保存文件
+  const PID_FILE = './runtime/agent.pid';
 
-    private $workers;
-    private $workNum  = 5;
-    private $config   = [];
-    private $status   ='running';
-    private $ppid     =0;
+  private $workers;
+  private $workNum  = 5;
+  private $config   = [];
+  private $status   ='running';
+  private $ppid     =0;
 
   public function register()
   {
-    $r = $this->encode('register','');
-    $this->cli->send($r);
+    
+
+    $ret['task'] = 'register';
+    $ret['code'] = 1;
+    $re = $this->encode($ret);
+    $r = $this->cli->send($re);
+    if ($r) {
+      $info = "注册成功";
+      $this->show($info);
+    }
   }
 
   protected function reConnect()
@@ -50,14 +60,36 @@ class Base{
         @$worker->name($exec . "#" . $task["id"]);
         $exec = explode(" ", trim($exec));
         $execfile = array_shift($exec);
-        $r = $worker->exec($execfile,$exec);
+        
+        $retmsg = $worker->exec($execfile,$exec);
+
       } catch (Exception $e) {
+
+
+        $task['run_code'] = -300;
+        $ret['task'] = $task;
+        $ret['code'] = 2;
+        $re = $this->encode($ret);
+        $r = $this->cli->send($re);
+
         $this->show('error: ' . $task['binArgs'][0] . $e->getMessage());
       }
     });
     $pid                 = $reserveProcess->start();
     $this->workers[$pid] = $reserveProcess;
-    $this->show('reserve start...' . $pid);
+    // $this->show('reserve start...' . $pid);
+
+    $task['msg'] = $retmsg;
+    $task['run_code'] = 500;
+    $ret['task'] = $task;
+    $ret['code'] = 2;
+    $re = $this->encode($ret);
+    $info ="已执行任务#{$task['guid']}";
+    $this->show($info);
+    $b = $this->cli->send($re);
+    var_dump($b);
+
+
     $this->registSignal();
   }
 
@@ -157,6 +189,7 @@ class Base{
 
   public function show($info='',$data = '')
   {
+    if ($this->debug) return;
     $time = date('Y-m-d H:i:s');
     if ($data) {
       $d = $this->decode($data);
@@ -170,10 +203,8 @@ class Base{
     return json_decode($r,true);
   }
 
-  public function encode($cmd ='',$params = '')
+  public function encode($data)
   {
-    $r['cmd'] = $cmd;
-    $r['params'] = $params;
-    return  json_encode($r);
+    return  json_encode($data);
   }
 }

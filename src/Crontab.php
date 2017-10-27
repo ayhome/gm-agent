@@ -5,9 +5,21 @@ use Group\Rpc\RpcService;
 class Crontab extends Base
 {
 
-  public function __construct($setting = array())
+
+  public function __construct($opt = '')
   {
-    $this->checkMasterProcess($command);
+    if ($opt['host']) {
+      $this->host = $opt['host'];
+    }
+    if ($opt['port']) {
+      $this->port = $opt['port'];
+    }
+    if ($opt['debug']) {
+      $this->debug = $opt['debug'];
+    }
+
+
+    // $this->checkMasterProcess($command);
     $this->setProcessName('gm-server: ' . $this->ppid . self::PROCESS_NAME_LOG);
     // $this->registSignal();
 
@@ -21,11 +33,8 @@ class Crontab extends Base
       // 'package_length_offset' => 4
     );
 
-    if (!empty($setting['daemon'])) {
+    if (!empty($opt['daemon'])) {
         \swoole_process::daemon(true,false);
-    }
-    if (!empty($setting['title'])){
-        $this->setProcessTitle($setting['title']);
     }
     $this->cli = new \swoole_client(SWOOLE_SOCK_TCP,SWOOLE_SOCK_ASYNC);
     $this->cli->on("Connect",[$this,"onConnect"]);
@@ -35,17 +44,14 @@ class Crontab extends Base
     $this->cli->set($setting);
     
     $this->connect();
+    # code...
   }
 
   public function connect()
   {
-    $config = array(
-      "host" =>'127.0.0.1',
-      "port" =>9911,
-    );
-    $info = "connect=>host:".$config["host"]." port:".$config["port"];
+    $info = "connect=>host:".$this->host." port:".$this->port;
     $this->show($info);
-    $this->cli->connect($config["host"],$config["port"],30);
+    $this->cli->connect($this->host,$this->port,30);
   }
 
 
@@ -56,9 +62,7 @@ class Crontab extends Base
     //清除重连定时器
     $this->clearTimer();
     //连接上了注册服务
-    $info = "正在发起注册";
-    $this->show($info);
-
+    
     
     $this->register();
 
