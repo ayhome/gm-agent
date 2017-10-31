@@ -3,7 +3,10 @@
     "type": "library",
     "description": "gmAgent base on Hprose",
     "keywords": [
-        "hprose",
+        "gmAgent",
+        "task",
+        "swoole",
+        "hprose"
     ],
     "homepage": "http://hprose.com/",
     "license": "MIT",
